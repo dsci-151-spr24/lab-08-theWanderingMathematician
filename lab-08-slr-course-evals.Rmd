@@ -1,6 +1,8 @@
 ---
 title: "Lab 8 - Grading the professor, Pt. 1"
 subtitle: "Modelling with a single predictor"
+author: "Micaiah Balonek"
+date: "20 March, 2024"
 output: html_document
 link-citations: true
 ---
