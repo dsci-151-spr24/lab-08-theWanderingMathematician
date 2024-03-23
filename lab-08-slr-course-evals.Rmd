@@ -141,7 +141,7 @@ score_bty_fit %>%
 
 5.  Recreate the scatterplot from Exercise 2, and add the regression line to this plot in orange colour, with shading for the uncertainty of the line turned off.
 
-```{r linear-regression-plot, eval = TRUE}
+```{r bty-regression-plot, eval = TRUE}
 ggplot(evals, aes(y = score, x = bty_avg)) +
   geom_point() +
   theme_minimal() +
@@ -156,7 +156,7 @@ ggplot(evals, aes(y = score, x = bty_avg)) +
 7.  Interpret the intercept of the linear model in context of the data.
     Comment on whether or not the intercept makes sense in this context.
 
-- *According to the linear model, If a professor's Average Beauty Rating were 0, their class score would be, on average, 3.88. However, this is just an extrapolation of the data, not something actually shown in it, since the lowest value of Average Beauty Rating in the data is only `r min(evals$bty_avg) points, so the intercept value doesn't really make sense.`*
+- *According to the linear model, If a professor's Average Beauty Rating were 0, their class score would be, on average, 3.88. However, this is just an extrapolation of the data, not something actually shown in it, since the lowest value of Average Beauty Rating in the data is only `r min(evals$bty_avg)` points, so the intercept value doesn't really make sense.*
 
 🧶 ✅ ⬆️ *If you haven't done so recently, knit, commit, and push your changes to GitHub with an appropriate commit message. Make sure to commit and push all changed files so that your Git pane is cleared up afterwards.*
 
@@ -164,6 +164,8 @@ ggplot(evals, aes(y = score, x = bty_avg)) +
 
 9.  Fit a new linear model called `score_gender_fit` to predict average professor evaluation `score` based on `gender` of the professor.
     Based on the regression output, write the linear model and interpret the slope and intercept in context of the data.
+
+
 
 10. What is the equation of the line corresponding to male professors?
     What is it for female professors?
