@@ -92,27 +92,27 @@ evals %>%
 ```
 
 ```{r score-beauty-scatterplot, eval = TRUE}
-ggplot(evals, aes(x = score, y = bty_avg)) +
+ggplot(evals, aes(y = score, x = bty_avg)) +
   geom_point() +
   theme_minimal() +
   geom_smooth(se = FALSE) +
-  labs(title = "Class evaluations", subtitle = "And their relation to the beauty rating of the course professor", x = "Evaluation score", y = "Average beauty rating")
+  labs(title = "Class evaluations", subtitle = "And their relation to the beauty rating of the course professor", y = "Evaluation score", x = "Average beauty rating")
 ```
 
-The relation between a professor's evaluation scores and beauty rating is seen to be slightly positive in this graph, with few points found on the upper-right, but many found on the left-central region of the graph, but also many others both above and below the regression line on the left half of the graph, presumably canceling eachother out.
+- *The relation between a professor's evaluation scores and beauty rating is seen to be slightly positive in this graph, with few points found on the bottom-right, but many found on the upper-left region of the graph, but also many others both above and below the regression line on the left half of the graph, presumably canceling eachother out, and a lot of extra points in the top part.*
 
 3.  Recreate the scatterplot from Exercise 2, but this time use\
     `geom_jitter()`? What does "jitter" mean? What was misleading about the initial scatterplot?
 
 ```{r score-beauty-jitterplot, eval = TRUE}
-ggplot(evals, aes(x = score, y = bty_avg)) +
+ggplot(evals, aes(y = score, x = bty_avg)) +
   geom_smooth(se = FALSE, alpha = 0.5) +
   geom_jitter(alpha = 0.3) +
   theme_minimal() +
-  labs(title = "Class evaluations", subtitle = "And their relation to the beauty rating of the course professor", x = "Evaluation score", y = "Average beauty rating")
+  labs(title = "Class evaluations", subtitle = "And their relation to the beauty rating of the course professor", y = "Evaluation score", x = "Average beauty rating")
 ```
 
-- *Using `geom_jitter` adds some random noise to each point. Doing this will make it visible where there are multiple points in the same area, while they cover eachother in the original scatterplot, so that the 'jitterplot' more accurately shows point density ( even moreso with the low alpha value I have selected). The jitterplot shows  that there are actually lots of points in the mid-lower right-hand side, as well as a large population of points with y-values between 4 and 5, around the area where the `smooth` curve is. Generally, it seems that there are a larger amount of points below the curve, but the points above it are generally more distant than the points below it..*
+- *Using `geom_jitter` adds some random noise to each point. Doing this will make it visible where there are multiple points in the same area, while they cover eachother in the original scatterplot, so that the 'jitterplot' more accurately shows point density (even moreso with the low alpha value I have selected). The jitterplot shows  that there are actually lots of points in the upper, mid-left side, as well as a large population of points with x-values between 4 and 5. Generally, it seems that there are a larger amount of points above the curve, but the points below it seem to be much more distant than the points above it.*
 
 🧶 ✅ ⬆️ *If you haven't done so recently, knit, commit, and push your changes to GitHub with an appropriate commit message. Make sure to commit and push all changed files so that your Git pane is cleared up afterwards.*
 
@@ -126,14 +126,37 @@ Linear model is in the form $\hat{y} = b_0 + b_1 x$.
     Fit a linear model called `score_bty_fit` to predict average professor evaluation `score` by average beauty rating (`bty_avg`).
     Based on the regression output, write the linear model.
 
+```{r score-bty-regression}
+score_bty_fit <- linear_reg() %>%
+  set_engine("lm") %>%
+  fit(score~bty_avg, data = evals)
+
+score_bty_fit %>%
+  tidy()
+```
+
+- ***The linear model is: score = `r slice_head(select(tidy(score_bty_fit), "estimate"), n = 1)` + `r slice_tail(select(tidy(score_bty_fit), "estimate"), n = 1)` \* bty_avg***
+
+- *This is a quite low correlation, even lower than it originally appeared on the graph*
 
 5.  Recreate the scatterplot from Exercise 2, and add the regression line to this plot in orange colour, with shading for the uncertainty of the line turned off.
 
+```{r linear-regression-plot, eval = TRUE}
+ggplot(evals, aes(y = score, x = bty_avg)) +
+  geom_point() +
+  theme_minimal() +
+  geom_smooth(colour = "orange", method = "lm", se = FALSE) +
+  labs(title = "Class evaluations", subtitle = "And their relation to the beauty rating of the course professor", y = "Evaluation score", x = "Average beauty rating")
+```
+
 6.  Interpret the slope of the linear model in context of the data.
+
+- *On average, for every 1-point increase in the professor's Average Beauty Rating, the class' Evaluation Score goes up by 0.067 points.*
 
 7.  Interpret the intercept of the linear model in context of the data.
     Comment on whether or not the intercept makes sense in this context.
 
+- *According to the linear model, If a professor's Average Beauty Rating were 0, their class score would be, on average, 3.88. However, this is just an extrapolation of the data, not something actually shown in it, since the lowest value of Average Beauty Rating in the data is only `r min(evals$bty_avg) points, so the intercept value doesn't really make sense.`*
 
 🧶 ✅ ⬆️ *If you haven't done so recently, knit, commit, and push your changes to GitHub with an appropriate commit message. Make sure to commit and push all changed files so that your Git pane is cleared up afterwards.*
 
