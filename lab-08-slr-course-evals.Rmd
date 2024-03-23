@@ -8,7 +8,7 @@ link-citations: true
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(eval = TRUE, warning = FALSE)
+knitr::opts_chunk$set(eval = TRUE, warning = FALSE, message = FALSE, error = FALSE)
 ```
 
 Many college courses conclude by giving students the opportunity to evaluate the course and the instructor anonymously.
@@ -51,6 +51,7 @@ You can load them by running the following in your Console:
 library(tidyverse) 
 library(tidymodels)
 library(openintro)
+library(flextable)
 ```
 
 ## Data
@@ -80,7 +81,8 @@ ggplot(evals, aes(x = score)) +
   labs(title = "Distrubution of scores in student course evaluations", x = "class score", y = "")
 
 evals %>%
-  summarise(mean = mean(score), median = median(score), min = min(score), max = max(score))
+  summarise(mean = mean(score), median = median(score), min = min(score), max = max(score)) %>% 
+  flextable() %>% autofit()
 ```
 
 - *We can see from both the histogram and the summary statisctics that there are no evaluations below 2, and that from there until 5, the amount of values is positively correlated to the score, meaning that there are many more scores with higher scores than lower scores. However, there are several possible reasons for this: it could be because, on average, the classes were all quite well-taught, or maybe the students don't want to give overly negative ratings to their professors. We don't have enough data to tell yet between these two or other possibilities.*
@@ -129,13 +131,16 @@ Linear model is in the form $\hat{y} = b_0 + b_1 x$.
 ```{r score-bty-regression}
 score_bty_fit <- linear_reg() %>%
   set_engine("lm") %>%
-  fit(score~bty_avg, data = evals)
+  fit(score~bty_avg, data = evals) %>%
+  tidy()
 
 score_bty_fit %>%
-  tidy()
+  flextable() %>% autofit()
 ```
 
-- ***The linear model is: score = `r slice_head(select(tidy(score_bty_fit), "estimate"), n = 1)` + `r slice_tail(select(tidy(score_bty_fit), "estimate"), n = 1)` \* bty_avg***
+- ***The linear model is: 
+
+$$ \widehat{score}_i = 4.28 - 0.13 \times btyavg_i $$
 
 - *This is a quite low correlation, even lower than it originally appeared on the graph*
 
@@ -165,20 +170,72 @@ ggplot(evals, aes(y = score, x = bty_avg)) +
 9.  Fit a new linear model called `score_gender_fit` to predict average professor evaluation `score` based on `gender` of the professor.
     Based on the regression output, write the linear model and interpret the slope and intercept in context of the data.
 
+```{r gender-score-regression}
+score_gender_fit <- linear_reg() %>%
+  set_engine("lm") %>%
+  fit(score~gender, data = evals) %>%
+  tidy()
 
+score_gender_fit %>%
+  flextable() %>% autofit()
+```
+
+- ***The linear model is: 
+
+$$ \widehat{score}_i = 4.09 + 0.14 \times male_i$$
+
+- *This means that the y-intercept represents the average evaluation score for classes with female professors (when `male = 0`), and the slope represents the difference between this value and the average value for male professors (when `male = 1).*
 
 10. What is the equation of the line corresponding to male professors?
     What is it for female professors?
 
+- ***In this model, the equation for the line corresponding to male professors is $score = 4.23$, and the same for female professors is $score = 4.09$.***
+
 11. Fit a new linear model called `score_rank_fit` to predict average professor evaluation `score` based on `rank` of the professor.
     Based on the regression output, write the linear model and interpret the slopes and intercept in context of the data.
 
+```{r rank-score-regression}
+score_rank_fit <- linear_reg() %>%
+  set_engine("lm") %>%
+  fit(score~rank, data = evals) %>%
+  tidy()
+
+score_rank_fit %>%
+  flextable() %>% autofit()
+```
+
+- ***This linear model is:***
+
+$$ \widehat{score}_i = 4.28 - 0.13 \times tenureTrack_i - 0.15 \times tenured_i$$
+
+- *The intercept (4.28) represents the average evaluation score of a teaching professor, while the two slopes (-0.13 and -0.15) represent the differences in average scores between each of the other two ranks and the "teaching" rank, so that the equation for the 'teaching' rank is `score = 4.28`, while the equation for the 'tenure track' rank is $ \widehat{score} = 4.28 - 0.13 = 4.15$ and that for the 'tenured' rank is $ \widehat{score} = 4.28 - 0.15 = 4.13$.*
+
 12. Create a new variable called `rank_relevel` where `"tenure track"` is the baseline level.
+
+```{r rank-releveling}
+evals <- evals %>%
+  mutate(rank_relevel = relevel(rank, ref = "tenure track"))
+```
 
 13. Fit a new linear model called `score_rank_relevel_fit` to predict average professor evaluation `score` based on `rank_relevel` of the professor.
     This is the new (releveled) variable you created in Exercise 12.
     Based on the regression output, write the linear model and interpret the slopes and intercept in context of the data.
-   
+
+```{r releveled-rank-score-regression}
+score_rank_relevel_fit <- linear_reg() %>%
+  set_engine("lm") %>%
+  fit(score~rank_relevel, data = evals) %>%
+  tidy()
+
+score_rank_relevel_fit %>%
+  flextable() %>% autofit()
+```   
+
+- *The linear model for this regression is:*
+
+$$\widehat{score}_i = 4.15 + 0.13 \times teaching_i - 0.02 \times tenured_i$$
+
+- *The intercept now reprecents the `tenure track` rank, with an average rating of 4.15, and the slopes represent the differences between that value and the other two, with the `teaching` rank's average being 0.13 points above the `tenure track` average and the `tenured` rank's average being 0.02 below it.*
 
 14. Create another new variable called `tenure_eligible` that labels `"teaching"` faculty as `"no"` and labels `"tenure track"` and `"tenured"` faculty as `"yes"`.
 
